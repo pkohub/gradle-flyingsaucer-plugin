@@ -1,0 +1,3 @@
+rootProject.name = 'gradle-flyingsaucer-plugin'
+include 'plugin'
+include 'converter'

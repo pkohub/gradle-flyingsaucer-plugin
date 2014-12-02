@@ -1,0 +1,4 @@
+dependencies {
+    compile "org.xhtmlrenderer:flying-saucer-pdf:${fsVersion}"
+    compile "net.sf.jtidy:jtidy:${jTidyVersion}"
+}

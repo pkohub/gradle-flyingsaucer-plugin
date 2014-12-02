@@ -1,0 +1,10 @@
+build/
+private/
+public/
+.gradle/
+.nb-gradle-properties
+.nb-gradle/
+*.iml
+*.ipr
+*.iws
+gradle-app.setting

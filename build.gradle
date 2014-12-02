@@ -1,0 +1,154 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+    }
+}
+
+apply plugin: 'maven-publish'
+
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'groovy'
+    apply plugin: 'java'
+    group = 'at.pkohub'
+    version = '0.1'
+    defaultTasks 'clean', 'build', 'createAllDeliverables'
+    
+    repositories {
+        jcenter()
+    }
+}
+
+ext {
+    fsVersion = '[9.0.7,)'
+    jTidyVersion = 'r938'
+}
+
+
+// Needed for Dependency section in generated POM file
+dependencies {
+    compile "org.xhtmlrenderer:flying-saucer-pdf:${fsVersion}"
+    compile "net.sf.jtidy:jtidy:${jTidyVersion}"
+}
+
+subprojects {
+    def compatibilityVersion = 1.6
+    sourceCompatibility = compatibilityVersion
+    targetCompatibility = compatibilityVersion
+
+    dependencies {
+        compile localGroovy()
+
+        //testCompile "junit:junit:4.11"
+        testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
+            exclude group: 'org.codehaus.groovy'
+        }
+    }
+}
+
+task uberJar(type: Jar, dependsOn: subprojects.assemble) {
+    description = 'Creates Uberjar.'
+
+    subprojects.each { project ->
+        from project.configurations.archives.allArtifacts.files.collect { zipTree(it) }
+    }
+
+    manifest {
+        attributes 'Implementation-Title': 'Gradle FlyingSaucer plugin',
+                   'Implementation-Version': version,
+                   'Built-By': System.getProperty('user.name'),
+                   'Built-Date': new Date(),
+                   'Built-JDK': System.getProperty('java.version'),
+                   'Built-Gradle': gradle.gradleVersion
+    }
+}
+
+task sourcesJar(type: Jar) {
+    description = 'Creates sources JAR.'
+    classifier = 'sources'
+
+    subprojects.each { project ->
+        from project.sourceSets.main.allSource
+    }
+}
+
+ext.javaDocsDir = 'build/docs/javadoc'
+
+task aggregateJavadocs(type: Javadoc) {
+   source subprojects.collect {project -> project.sourceSets.main.allJava }
+   destinationDir file(javaDocsDir)
+   // Might need a classpath
+   classpath = files(subprojects.collect {project -> project.sourceSets.main.compileClasspath})
+}
+
+task javadocJar(type: Jar, dependsOn: aggregateJavadocs) {
+    description = 'Creates JavaDocs JAR.'
+    classifier = 'javadoc'
+    
+    from javaDocsDir
+}
+
+task createAllDeliverables(dependsOn: [uberJar, sourcesJar, javadocJar]) {
+    description = 'Creates all deliverables including plugin JAR sources JAR and javadoc JAR.'
+}
+
+task aggregateTestReports(type: TestReport) {
+    destinationDir = file("$buildDir/reports/all-tests")
+    reportOn subprojects*.test
+}
+
+check.dependsOn aggregateTestReports
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "2.2.1"
+}
+
+artifacts {
+    archives uberJar
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact uberJar
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', 'Gradle FlyingSaucer plugin')
+                root.appendNode('description', 'Gradle FlyingSaucer plugin supporting the conversion of HTML to PDF by the flyingsaucer library.')
+                root.appendNode('url', 'https://github.com/pkohub/gradle-flyingsaucer-plugin')
+                root.appendNode('inceptionYear', '2014')
+
+                def scm = root.appendNode('scm')
+                scm.appendNode('url', 'https://github.com/pkohub/gradle-flyingsaucer-plugin')
+                scm.appendNode('connection', 'scm:https://pkohub@github.com/pkohub/gradle-flyingsaucer-plugin.git')
+                scm.appendNode('developerConnection', 'scm:git://github.com/pkohub/gradle-flyingsaucer-plugin.git')
+
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'The Apache Software License, Version 2.0')
+                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
+
+                def developers = root.appendNode('developers')
+                def pkohub = developers.appendNode('developer')
+                pkohub.appendNode('id', 'pkohub')
+                pkohub.appendNode('name', 'Philipp Kolmhofer')
+                
+                def dependenciesNode = asNode().appendNode('dependencies')
+                configurations.compile.allDependencies.each {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', it.group)
+                    dependencyNode.appendNode('artifactId', it.name)
+                    dependencyNode.appendNode('version', it.version)
+                }
+            }
+        }
+    }
+}
