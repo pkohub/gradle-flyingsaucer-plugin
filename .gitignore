@@ -8,3 +8,4 @@ public/
 *.ipr
 *.iws
 gradle-app.setting
+.idea/
