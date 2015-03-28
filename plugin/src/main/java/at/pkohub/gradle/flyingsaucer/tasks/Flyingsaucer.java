@@ -33,7 +33,7 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
 /**
- *
+ * Task implementation.
  * @author Philipp Kolmhofer
  */
 public class Flyingsaucer extends DefaultTask {

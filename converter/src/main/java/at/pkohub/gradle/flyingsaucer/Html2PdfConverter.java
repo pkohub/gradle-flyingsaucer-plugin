@@ -28,8 +28,7 @@ import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 /**
- * Converter for valid HTML to PDF
- * 
+ * Converter for valid HTML to PDF.
  * @author Philipp Kolmhofer
  */
 public class Html2PdfConverter {
@@ -37,7 +36,7 @@ public class Html2PdfConverter {
     private final String fullResourceBasePath;
     
     /**
-     * Construct a new instance
+     * Construct a new instance.
      * @param resPath Resource path for additional files like css, images, ...
      */
     public Html2PdfConverter(String resPath) {
@@ -49,7 +48,7 @@ public class Html2PdfConverter {
     }
     
     /**
-     * Render a document
+     * Render a document.
      * @param inputStream InputStream
      * @param outputStream OutputStream
      * @param cleanUp if true, JTidy is used to check and clean html before conversion
@@ -82,7 +81,7 @@ public class Html2PdfConverter {
     }
     
     /**
-     * Read string from InputStream
+     * Read string from InputStream.
      * @param is InputStream
      * @return String
      */
@@ -112,7 +111,6 @@ public class Html2PdfConverter {
         }
 
         return sb.toString();
-
     }
 	
 }

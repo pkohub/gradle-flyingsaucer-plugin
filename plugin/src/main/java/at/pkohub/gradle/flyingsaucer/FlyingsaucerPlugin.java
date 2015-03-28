@@ -20,7 +20,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 
 /**
- *
+ * Plugin implementation.
  * @author Philipp Kolmhofer
  */
 public class FlyingsaucerPlugin implements Plugin<Project> {
