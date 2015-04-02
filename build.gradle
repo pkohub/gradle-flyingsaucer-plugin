@@ -107,7 +107,9 @@ task aggregateTestReports(type: TestReport) {
 check.dependsOn aggregateTestReports
 
 task wrapper(type: Wrapper) {
+    description = 'Generates gradlew[.bat] scripts'
     gradleVersion = "2.3"
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 artifacts {
